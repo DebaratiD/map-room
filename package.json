@@ -1,0 +1,39 @@
+{
+  "name": "map-room",
+  "version": "1.0.0",
+  "description": "An app that creates rooms for people to see each others location and chat",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"next dev\" \"npm run backend\"",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "backend": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DebaratiD/map-room.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DebaratiD/map-room/issues"
+  },
+  "homepage": "https://github.com/DebaratiD/map-room#readme",
+  "dependencies": {
+    "concurrently": "^9.0.1",
+    "cors": "^2.8.5",
+    "deep-email-validator": "^0.1.21",
+    "express": "^4.21.0",
+    "next": "^14.2.14",
+    "nodemon": "^3.1.7",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.7.4",
+    "@types/react": "18.3.11",
+    "typescript": "5.6.2"
+  }
+}
