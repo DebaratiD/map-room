@@ -1,0 +1,49 @@
+{
+  "name": "map-room",
+  "version": "1.0.0",
+  "description": "An app that creates rooms for people to see each others location and chat",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "backend": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DebaratiD/map-room.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DebaratiD/map-room/issues"
+  },
+  "homepage": "https://github.com/DebaratiD/map-room#readme",
+  "dependencies": {
+    "@chakra-ui/react": "^3.2.3",
+    "@emotion/react": "^11.14.0",
+    "concurrently": "^9.0.1",
+    "cors": "^2.8.5",
+    "deep-email-validator": "^0.1.21",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "firebase": "^10.14.1",
+    "firebaseui": "^6.1.0",
+    "maplibre-gl": "^4.7.1",
+    "next": "^14.2.14",
+    "next-themes": "^0.4.4",
+    "nodemon": "^3.1.7",
+    "prop-types": "^15.8.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-icons": "^5.4.0",
+    "socket.io-client": "^4.8.1",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.7.4",
+    "@types/react": "18.3.11",
+    "typescript": "5.6.2"
+  }
+}
