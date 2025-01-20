@@ -8,6 +8,9 @@ function MyMapComponent({mapid, lat, long}){
   const API_KEY = 'rMiiapJoAS7kCb9pEikQ';
   const mapContainer = useRef(null);
   const map = useRef(null);
+  const [Lat, setLat] = useState(lat);
+  const [Long, setLong] = useState(long);
+  const [markers, setMarkers] = useState([]);
   //const [map, setmap] = useState({});
   // const map = new maplibregl.Map({
   //           container: 'map', // container id
@@ -18,28 +21,33 @@ function MyMapComponent({mapid, lat, long}){
 
   useEffect(()=>{
     if (map.current) return; // stops map from intializing more than once
-  
+    console.log(Lat, Long);
     map.current = new maplibregl.Map({
       container: mapContainer.current,
       style: `https://api.maptiler.com/maps/streets-v2/style.json?key=${API_KEY}`,
-      center: [long, lat],
+      center: [Long,Lat],
       zoom: 11
     });
 
     const marker = new maplibregl.Marker()
-        .setLngLat([long, lat])
+        .setLngLat([Long, Lat])
         .addTo(map.current);
+  },[API_KEY]);
 
+  
+  useEffect(()=>{    
     navigator.geolocation.watchPosition((position)=>{
-      if(position.coords.latitude!=lat || position.coords.longitude!=long){
-        lat = position.coords.latitude;
-        long = position.coords.longitude;
-        socket.emit("updateLocation",{mapId:mapid, userID:localStorage.getItem("userID"), lat:lat,long:long});}
+      if(position.coords.latitude!=Lat || position.coords.longitude!=Long){
+        setLat(position.coords.latitude);
+        setLong(position.coords.longitude);
+        //console.log(map.current);
+       // socket.emit("updateLocation",{mapId:mapid, userID:localStorage.getItem("userID"), lat:Lat,long:Long});
+        }
     },
     (error)=>{
       console.log("Could not access location");
     })
-  },[API_KEY, long, lat]);
+  },[setLat, setLong]);
 
 
       return (

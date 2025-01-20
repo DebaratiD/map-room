@@ -1,12 +1,13 @@
 'use client'
 import { onAuthStateChanged, User } from "firebase/auth";
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react";
 import { auth } from "./firebase-config";
 import { useRouter } from "next/navigation";
 import { signOutAPI } from "./apis/AuthAPI";
 import MyMapComponent from "./components/MyMap";
 import { socket } from "./apis/Socket";
 import { Box, Button, Flex, Heading, Input, Stack, StackSeparator, Text } from "@chakra-ui/react";
+import Loader from "./components/Loader";
 
 export default function Page(){
     const router = useRouter();
@@ -35,36 +36,26 @@ export default function Page(){
         signOutAPI();
         router.push("/signin");
     }
-
-   // const name = JSON.parse(localStorage.getItem('user'))?.name;
-
-    useEffect(()=>{
-        navigator.geolocation.getCurrentPosition((position)=>{
-
-            setLocation({...locatioN, lat:position.coords.latitude, long:position.coords.longitude});
-
-            },
-
-            (error)=>{
-                alert("Location cannot be accessed");
-        });
-         
-    },[setLocation]);
     
-
-    const createRoom = ()=>{
+    const createRoom = async ()=>{
         let name = JSON.parse(localStorage.getItem('user'))?.name;
-        setMapID("abs");
-       // localStorage.setItem("userID",res.user.userID);
+
+        await navigator.geolocation.getCurrentPosition((position)=>{
+            setLocation({...locatioN,lat:position.coords.latitude,long:position.coords.longitude});
+        },
+        (error)=>{
+            console.log("Could not access location: ",error);
+        });
+        
         setShowOpt(false);
-        setShowMap(true);
-        // socket.emit("create_map",{name:name, lat:locatioN.lat, long:locatioN.long});
-        // socket.on("map_created",(res)=>{
-        //     setMapID(res?.map);
-        //     localStorage.setItem("userID",res.user.userID);
-        //     setShowOpt(false);
-        //     setShowMap(true);
-        // });
+        socket.emit("create_map",{name:name, lat:locatioN.lat, long:locatioN.long, userId: socket.id});
+        socket.on("map_created",(res)=>{
+          
+            setMapID(res?.map);
+            localStorage.setItem("userID",res.user.id);
+            setShowOpt(false);
+            setShowMap(true);
+        });
     }
     const joinRoom = (mapID:String)=> {
 
@@ -77,11 +68,14 @@ export default function Page(){
     const leaveMap = ()=>{
         setShowMap(false);
         setShowOpt(true);
-        socket.emit("disconnect",{mapId: mapId, userId:localStorage.getItem("userID")});
+        console.log(mapId, localStorage.getItem("userID"))
+        socket.emit("leave_map",{mapId: mapId, userId:localStorage.getItem("userID")});
     }
 
     return (
-        
+        <>
+            {!showOpt && <Loader />}
+            {showOpt && 
             <Box p={4} m={4}>
                 {(showOpt || showMap) && 
                 <Flex width="100%" mr={1} justify="space-between">
@@ -93,7 +87,7 @@ export default function Page(){
                 </Flex>
                 
                 
-                <Box m="auto" width="50%" p="5" borderWidth="1px" borderColor="border.disabled" hidden={showOpt}>
+                <Box m="auto" width="50%" p="5" borderWidth="1px" borderColor="border.disabled" >
                     {!join && 
                     <Stack separator={<StackSeparator />}>
                         <Button onClick={createRoom}>Create a map</Button>
@@ -104,7 +98,7 @@ export default function Page(){
                     <Stack gap="4">
                         <Input placeholder="Enter Map ID:" type="text" onChange={(event)=>{setMapID(event.target.value)}}/>
                         <Stack direction="row">
-                            <Button width="50%" onClick={()=>{setJoin(false);}}>Cancel</Button>
+                            <Button width="50%" onClick={()=>{setJoin(false); leaveMap();}}>Cancel</Button>
                             <Button width="50%" disabled={!mapId.length} onClick={()=>joinRoom(mapId)}>Join map</Button>
                         </Stack>
                     </Stack>}
@@ -122,7 +116,7 @@ export default function Page(){
                 </Box>
                 }
             </Box>
-        
-    
+            }
+        </>
     );
 }
