@@ -10,7 +10,7 @@ function MyMapComponent({mapid, lat, long}){
   const map = useRef(null);
   const [Lat, setLat] = useState(lat);
   const [Long, setLong] = useState(long);
-  const [markers, setMarkers] = useState([]);
+  const [markers, setMarkers] = useState<maplibregl.Marker[]>([]);
   //const [map, setmap] = useState({});
   // const map = new maplibregl.Map({
   //           container: 'map', // container id

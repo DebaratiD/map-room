@@ -8,6 +8,7 @@ import MyMapComponent from "./components/MyMap";
 import { socket } from "./apis/Socket";
 import { Box, Button, Flex, Heading, Input, Stack, StackSeparator, Text } from "@chakra-ui/react";
 import Loader from "./components/Loader";
+import Navbar from "./components/Navbar";
 
 export default function Page(){
     const router = useRouter();
@@ -15,6 +16,7 @@ export default function Page(){
     const [mapId, setMapID] = useState("");
     const [join, setJoin] = useState(false);
     const [showMap, setShowMap] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [locatioN, setLocation] = useState({lat:0, long:0});
 
 
@@ -25,6 +27,7 @@ export default function Page(){
                 name:res.displayName
             }
             localStorage.setItem("user", JSON.stringify(user));
+            setLoading(false);
             setShowOpt(true);
         }
         else{
@@ -32,20 +35,22 @@ export default function Page(){
             router.push("/signin");
         }
     })
-    const signOut = async ()=>{
-        signOutAPI();
-        router.push("/signin");
-    }
-    
-    const createRoom = async ()=>{
-        let name = JSON.parse(localStorage.getItem('user'))?.name;
-
+   
+    const currentPosition = async ()=>{
+        
         await navigator.geolocation.getCurrentPosition((position)=>{
             setLocation({...locatioN,lat:position.coords.latitude,long:position.coords.longitude});
         },
         (error)=>{
             console.log("Could not access location: ",error);
         });
+
+    }
+    
+    const createRoom = async ()=>{
+        let name = JSON.parse(localStorage.getItem('user'))?.name;
+
+        await currentPosition();
         
         setShowOpt(false);
         socket.emit("create_map",{name:name, lat:locatioN.lat, long:locatioN.long, userId: socket.id});
@@ -57,36 +62,38 @@ export default function Page(){
             setShowMap(true);
         });
     }
-    const joinRoom = (mapID:String)=> {
+    const joinRoom = async (mapID:String)=> {
 
-        mapID = mapID.replace("-","");
+       // mapID = mapID.replace("-","");
         let name = JSON.parse(localStorage.getItem('user'))?.name;
-        console.log(mapID);
-        socket.emit("join_map", {mapID:mapID, name: name, lat:locatioN.lat, long:locatioN.long});
+
+        await currentPosition();
+
+        socket.emit("join_map", {mapId:mapID, name: name, userid:socket.id, lat:locatioN.lat, long:locatioN.long});
+        socket.on("map_joined",(res)=>{
+            setShowMap(true);
+        })
     }
    
     const leaveMap = ()=>{
         setShowMap(false);
         setShowOpt(true);
-        console.log(mapId, localStorage.getItem("userID"))
         socket.emit("leave_map",{mapId: mapId, userId:localStorage.getItem("userID")});
     }
 
     return (
         <>
-            {!showOpt && <Loader />}
-            {showOpt && 
+            {loading && <Loader />}
+            {!loading && 
             <Box p={4} m={4}>
                 {(showOpt || showMap) && 
-                <Flex width="100%" mr={1} justify="space-between">
-                    {showMap && <Text>Map ID: {mapId}</Text>}
-                    <Button onClick={signOut}>Sign Out</Button>
-                </Flex>}
-                <Flex justify="center" align="center" width="100%" height="30vh">
+                <Navbar router={router} mapId={mapId} showMap={showMap}/>
+                }
+                <Flex justify="center" align="center" width="100%" height="20vh">
                     <Heading size="5xl">Welcome to MapRoom!</Heading> 
                 </Flex>
                 
-                
+                {!showMap && 
                 <Box m="auto" width="50%" p="5" borderWidth="1px" borderColor="border.disabled" >
                     {!join && 
                     <Stack separator={<StackSeparator />}>
@@ -102,7 +109,7 @@ export default function Page(){
                             <Button width="50%" disabled={!mapId.length} onClick={()=>joinRoom(mapId)}>Join map</Button>
                         </Stack>
                     </Stack>}
-                </Box>
+                </Box>}
 
                 {showMap && 
                 <Box>

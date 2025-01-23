@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import './globals.css';
 import { Provider } from "@/components/ui/provider"
 
